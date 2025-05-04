@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { submitPhoneNumber } from "@/app/actions";
-import { Utensils, GlassWater, ChefHat } from 'lucide-react';
+import { Utensils, GlassWater, ChefHat, Soup, CookingPot } from 'lucide-react'; // Added Soup, CookingPot
 
 interface MenuItem {
   id: string;
@@ -35,6 +35,11 @@ const menuItems: MenuItem[] = [
   { id: "ram_grill", name: "Ram Grill", description: "Succulent grilled ram meat.", icon: ChefHat, imageHint: "grilled lamb meat" },
   { id: "palm_wine", name: "Palm Wine", description: "Traditional fermented palm sap drink.", icon: GlassWater, imageHint: "palm wine glass" },
   { id: "kunu", name: "Kunu", description: "Refreshing millet or sorghum drink.", icon: GlassWater, imageHint: "kunu drink nigeria" },
+  { id: "miyan_kuka", name: "Miyan Kuka", description: "Dried baobab leaves soup, a Hausa specialty.", icon: Soup, imageHint: "miyan kuka soup nigeria" },
+  { id: "igbo_egusi", name: "Igbo Egusi & Yellow Eba", description: "Melon seed soup served with cassava dough.", icon: Utensils, imageHint: "egusi soup eba nigeria" },
+  { id: "masa", name: "Masa", description: "Northern Nigerian rice cakes/pancakes.", icon: CookingPot, imageHint: "masa rice cake nigeria" },
+  { id: "jollof_chicken", name: "Jollof Rice & Chicken", description: "Classic Jollof rice with chicken and plantain.", icon: Utensils, imageHint: "jollof rice chicken plantain" },
+  { id: "banga_starch", name: "Banga and Starch", description: "Palm nut soup served with delta starch.", icon: Soup, imageHint: "banga soup starch delta nigeria" },
 ];
 
 const FormSchema = z.object({
@@ -261,5 +266,3 @@ export function MenuList(props: ComponentProps<"form">) {
     </Form>
   );
 }
-
-    
