@@ -3,7 +3,8 @@
 import type { ComponentProps } from "react";
 import { useState, useEffect, useTransition } from "react";
 import Image from "next/image";
-import { useFormState, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form"; // Import useForm from react-hook-form
+import { useFormState } from "react-dom"; // Import useFormState from react-dom for server actions
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion"; // Import motion for animations
@@ -64,7 +65,7 @@ export function MenuList(props: ComponentProps<"form">) {
     },
   });
 
-  // Use useFormState for handling server action response
+  // Use useFormState from react-dom for handling server action response
   const [state, formAction] = useFormState(submitPhoneNumber, initialState);
 
   // Watch for changes in selectedMeal form value
@@ -99,12 +100,16 @@ export function MenuList(props: ComponentProps<"form">) {
          form.reset(); // Reset form on success
          setShowPhoneInput(false);
          setSelectedMeal(null);
+         // Reset the server action state as well
+         state.message = "";
+         state.success = false;
+         state.error = undefined;
       } else if (state.error === 'phoneNumber') {
          form.setError("phoneNumber", { message: state.message });
       } else if (state.error === 'meal') {
          form.setError("selectedMeal", {message: state.message});
          // Optionally hide phone input again if meal error occurs after showing it
-         setShowPhoneInput(false);
+         // setShowPhoneInput(false); // Let's keep it visible if they just made a meal error
       }
     }
   }, [state, toast, form]);
