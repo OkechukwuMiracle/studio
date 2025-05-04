@@ -1,10 +1,11 @@
+
 "use client";
 
 import type { ComponentProps } from "react";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useActionState } from "react"; // Import useActionState
 import Image from "next/image";
-import { useForm } from "react-hook-form"; // Import useForm from react-hook-form
-import { useFormState } from "react-dom"; // Import useFormState from react-dom for server actions
+import { useForm } from "react-hook-form";
+// Removed import { useFormState } from "react-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion"; // Import motion for animations
@@ -48,7 +49,7 @@ type FormData = z.infer<typeof FormSchema>;
 const initialState = {
   message: "",
   success: false,
-  error: undefined,
+  error: undefined as string | undefined, // Explicitly type error
 };
 
 export function MenuList(props: ComponentProps<"form">) {
@@ -65,8 +66,8 @@ export function MenuList(props: ComponentProps<"form">) {
     },
   });
 
-  // Use useFormState from react-dom for handling server action response
-  const [state, formAction] = useFormState(submitPhoneNumber, initialState);
+  // Use useActionState for handling server action response
+  const [state, formAction, isActionPending] = useActionState(submitPhoneNumber, initialState);
 
   // Watch for changes in selectedMeal form value
    const watchedMeal = form.watch("selectedMeal");
@@ -76,16 +77,10 @@ export function MenuList(props: ComponentProps<"form">) {
     if (watchedMeal && watchedMeal !== selectedMeal) {
       setSelectedMeal(watchedMeal);
       setShowPhoneInput(true);
-      // Reset server action state when meal changes
-       if (state.message) {
-         // A bit hacky, ideally useFormState would reset, but this works
-         // Resetting the state manually if needed - or rely on UI logic
-         state.message = "";
-         state.success = false;
-         state.error = undefined;
-       }
+      // Reset server action state when meal changes - useActionState handles this better
+      // if (state.message) { ... } // No longer needed
     }
-  }, [watchedMeal, selectedMeal, state]);
+  }, [watchedMeal, selectedMeal]);
 
 
   // Effect to show toast messages based on server action state
@@ -100,39 +95,43 @@ export function MenuList(props: ComponentProps<"form">) {
          form.reset(); // Reset form on success
          setShowPhoneInput(false);
          setSelectedMeal(null);
-         // Reset the server action state as well
-         state.message = "";
-         state.success = false;
-         state.error = undefined;
+         // Resetting state is handled internally by useActionState on next action
       } else if (state.error === 'phoneNumber') {
          form.setError("phoneNumber", { message: state.message });
       } else if (state.error === 'meal') {
          form.setError("selectedMeal", {message: state.message});
-         // Optionally hide phone input again if meal error occurs after showing it
-         // setShowPhoneInput(false); // Let's keep it visible if they just made a meal error
       }
     }
+     // Clear previous errors when input changes
+     form.clearErrors();
   }, [state, toast, form]);
 
    // Wrapper function to include selectedMeal in FormData for the action
    const handleFormSubmit = (formData: FormData) => {
      const data = new FormData();
      data.append("selectedMeal", formData.selectedMeal);
-     // Only append phoneNumber if it's visible and has a value
-     if (showPhoneInput && formData.phoneNumber) {
-       data.append("phoneNumber", formData.phoneNumber);
-     } else if (showPhoneInput && !formData.phoneNumber) {
+
+     if (showPhoneInput && !formData.phoneNumber) {
         form.setError("phoneNumber", { message: "Phone number is required to submit." });
         return; // Prevent submission if phone is required but empty
-     } else if (!formData.selectedMeal) {
+     } else if (showPhoneInput && formData.phoneNumber) {
+         data.append("phoneNumber", formData.phoneNumber);
+     }
+
+     if (!formData.selectedMeal) {
          form.setError("selectedMeal", { message: "Please select a meal first." });
          return; // Prevent submission if no meal selected
      }
 
+     // useActionState handles the pending state, but useTransition can still be used
+     // for finer-grained control if needed elsewhere.
+     // Using the pending state from useActionState directly for the button.
+     formAction(data);
 
-     startTransition(() => {
-       formAction(data);
-     });
+     // Example using startTransition if needed for other UI updates:
+     // startTransition(() => {
+     //   formAction(data);
+     // });
    };
 
   return (
@@ -155,7 +154,10 @@ export function MenuList(props: ComponentProps<"form">) {
                   }}
                   value={field.value}
                   className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  // Add aria-labelledby to associate the group with its label
+                  aria-labelledby="meal-label"
                 >
+                 <span id="meal-label" className="sr-only">Choose Your Meal</span>
                   {menuItems.map((item, index) => {
                     const Icon = item.icon;
                     return (
@@ -169,7 +171,7 @@ export function MenuList(props: ComponentProps<"form">) {
                          <Card className={`flex-1 transition-shadow duration-300 hover:shadow-lg ${field.value === item.id ? 'ring-2 ring-primary shadow-lg' : ''}`}>
                            <CardHeader className="flex flex-row items-center justify-between pb-2">
                              <div className="flex items-center space-x-3">
-                               {Icon && <Icon className="h-5 w-5 text-primary" />}
+                               {Icon && <Icon className="h-5 w-5 text-primary" aria-hidden="true" />}
                                <CardTitle className="text-lg">{item.name}</CardTitle>
                              </div>
                              <FormControl>
@@ -179,14 +181,14 @@ export function MenuList(props: ComponentProps<"form">) {
                            <CardContent className="flex items-center space-x-4 pt-2">
                               <Image
                                 src={`https://picsum.photos/seed/${item.id}/100/100`}
-                                alt={item.name}
+                                alt="" // Alt text provided by Label
                                 width={60}
                                 height={60}
                                 className="rounded-md object-cover"
                                 data-ai-hint={item.imageHint}
                               />
                              <Label htmlFor={item.id} className="text-sm font-normal text-muted-foreground flex-1 cursor-pointer">
-                               {item.description}
+                               {item.name}: {item.description} {/* Combined name and description for better context */}
                              </Label>
                            </CardContent>
                          </Card>
@@ -208,7 +210,8 @@ export function MenuList(props: ComponentProps<"form">) {
            transition={{ duration: 0.4, ease: "easeInOut" }}
            style={{ overflow: 'hidden' }} // Hide content when collapsed
          >
-           {showPhoneInput && ( // Render only when expanded to avoid unnecessary rendering
+           {/* Render content only when expanded to avoid potential focus issues */}
+           {showPhoneInput && (
              <FormField
                control={form.control}
                name="phoneNumber"
@@ -223,9 +226,11 @@ export function MenuList(props: ComponentProps<"form">) {
                         placeholder="+1234567890"
                         className="transition-colors duration-300 focus:border-primary focus:ring-primary"
                         aria-required="true"
+                        aria-invalid={!!form.formState.errors.phoneNumber} // Indicate invalid state
+                        aria-describedby="phoneNumber-error" // Link to error message
                       />
                    </FormControl>
-                   <FormMessage />
+                   <FormMessage id="phoneNumber-error" /> {/* Ensure ID matches aria-describedby */}
                  </FormItem>
                )}
              />
@@ -244,10 +249,10 @@ export function MenuList(props: ComponentProps<"form">) {
              <Button
                  type="submit"
                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 transition-transform duration-200 hover:scale-105 active:scale-95"
-                 disabled={isPending}
-                 aria-busy={isPending}
+                 disabled={isActionPending} // Use pending state from useActionState
+                 aria-busy={isActionPending} // Indicate busy state
                >
-                 {isPending ? "Submitting..." : "Submit Selection"}
+                 {isActionPending ? "Submitting..." : "Submit Selection"}
                </Button>
              )}
            </motion.div>
@@ -256,3 +261,5 @@ export function MenuList(props: ComponentProps<"form">) {
     </Form>
   );
 }
+
+    
