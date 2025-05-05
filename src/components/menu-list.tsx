@@ -40,6 +40,7 @@ const foodItems: MenuItem[] = [
   { id: "masa", name: "Masa", description: "Northern Nigerian rice cakes/pancakes.", icon: CookingPot, imageHint: "masa rice cake nigeria", type: "food" },
   { id: "jollof_chicken", name: "Jollof Rice & Chicken", description: "Classic Jollof rice with chicken and plantain.", icon: Utensils, imageHint: "jollof rice chicken plantain", type: "food" },
   { id: "banga_starch", name: "Banga and Starch", description: "Palm nut soup served with delta starch.", icon: Soup, imageHint: "banga soup starch delta nigeria", type: "food" },
+
 ];
 
 const drinkItems: MenuItem[] = [
