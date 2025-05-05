@@ -2,7 +2,7 @@ import Image from "next/image";
 import { QrCodeDisplay } from "@/components/qr-code";
 import { MenuList } from "@/components/menu-list";
 import { Separator } from "@/components/ui/separator";
-import { UtensilsCrossed } from "lucide-react"; // Changed Icon
+import { UtensilsCrossed, PartyPopper } from "lucide-react";
 
 export default function Home() {
   return (
@@ -10,20 +10,31 @@ export default function Home() {
       <div className="w-full max-w-4xl flex flex-col items-center space-y-8">
 
         {/* Header Section */}
-        <header className="text-center space-y-2">
+        <header className="text-center space-y-4">
            <Image
-              src="https://picsum.photos/seed/onga_event/150/80" // Placeholder Logo - updated seed
+              src="https://picsum.photos/seed/onga_event_logo/150/80" // Consistent logo seed
               alt="Onga Village Event Logo"
               width={150}
               height={80}
               className="mx-auto rounded-md shadow-sm"
-              data-ai-hint="event logo festive celebration" // Updated hint
+              data-ai-hint="event logo festive celebration"
             />
           <h1 className="text-4xl md:text-5xl font-bold text-primary flex items-center justify-center gap-3">
              <UtensilsCrossed className="h-8 w-8 md:h-10 md:w-10 text-secondary" /> Onga Village Feast
           </h1>
-          <p className="text-lg text-muted-foreground">Select Your Meal & Drink!</p> {/* Updated tagline */}
+          <p className="text-lg text-muted-foreground">Select Your Meal & Optional Drinks!</p>
         </header>
+
+        {/* Welcome Message */}
+        <div className="text-center p-4 bg-card rounded-lg shadow border border-border max-w-xl">
+          <h2 className="text-2xl font-semibold text-foreground mb-2 flex items-center justify-center gap-2">
+            <PartyPopper className="h-6 w-6 text-accent" /> Welcome to the Celebration!
+          </h2>
+          <p className="text-muted-foreground">
+            We're delighted to have you join the Onga Village Feast. Please make your food selection below. Drinks are optional. Enjoy the festivities!
+          </p>
+        </div>
+
 
         <Separator className="w-1/2 bg-border" />
 
@@ -32,7 +43,6 @@ export default function Home() {
 
           {/* Menu Section */}
           <section className="w-full md:flex-1 order-2 md:order-1">
-             {/* MenuList component now handles food and drinks */}
              <MenuList />
           </section>
 

@@ -1,3 +1,4 @@
+
 "use server";
 
 import { z } from "zod";
@@ -5,131 +6,142 @@ import { z } from "zod";
 // In-memory store (replace with a database in production)
 interface Submission {
   phoneNumber: string;
-  selectedItems: string[];
+  selectedFood: string;
+  selectedDrinks: string[]; // Array for drinks
   timestamp: Date;
 }
 const submissions: Submission[] = [];
-const submittedPhoneNumbers = new Set<string>(); // Keep track for uniqueness check
+const submittedPhoneNumbers = new Map<string, Submission>(); // Use Map for easier duplicate check and retrieval
 
 // Schemas
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format. Use E.164 (e.g., +1234567890).");
-const itemsSchema = z.array(z.string()).min(1, "Please select at least one item."); // Ensure at least one item
+const foodSchema = z.string().min(1, "Please select a food item."); // Single food item
+const drinksSchema = z.array(z.string()).optional(); // Optional array of drinks
 
-interface SubmitResult {
-  success: boolean;
-  message: string;
-  error?: string; // General error category
-  fieldErrors?: Record<string, string[]>; // Field-specific errors
+// Define the shape of the successful return value
+interface SuccessSubmission {
+    phoneNumber: string;
+    selectedFood: string;
+    selectedDrinks?: string[];
 }
 
-export async function submitPhoneNumber(prevState: any, formData: FormData): Promise<SubmitResult> {
-  const selectedItems = formData.getAll("selectedItems") as string[]; // Get all selected items
-  const phoneNumber = formData.get("phoneNumber") as string | null; // Phone number might not be present if form submitted early
+// Update SubmitResult to include submission data on success
+export interface SubmitResult {
+  success: boolean;
+  message: string;
+  error?: 'validation' | 'database' | 'duplicate_phone' | 'unknown'; // More specific error categories
+  fieldErrors?: Record<string, string[]> | null; // Use null for consistency
+  submission?: SuccessSubmission | null; // Data returned on success
+}
 
-  console.log("Server Action: Received data:", { selectedItems, phoneNumber });
+export async function submitPhoneNumber(prevState: SubmitResult | null, formData: FormData): Promise<SubmitResult> {
+  const selectedFood = formData.get("selectedFood") as string | null;
+  const selectedDrinks = formData.getAll("selectedDrinks") as string[]; // Get all drinks
+  const phoneNumber = formData.get("phoneNumber") as string | null;
 
-  // 1. Validate Selected Items
-  const validatedItems = itemsSchema.safeParse(selectedItems);
-  if (!validatedItems.success) {
-    console.error("Server Action: Invalid items selection", validatedItems.error.flatten());
-    return {
-      success: false,
-      message: "Validation failed.",
-      fieldErrors: { selectedItems: validatedItems.error.flatten().formErrors },
-    };
+  console.log("Server Action: Received data:", { selectedFood, selectedDrinks, phoneNumber });
+
+  let fieldErrors: Record<string, string[]> = {};
+  let isValid = true;
+
+  // 1. Validate Food Selection
+  const validatedFood = foodSchema.safeParse(selectedFood);
+  if (!validatedFood.success) {
+    console.error("Server Action: Invalid food selection", validatedFood.error.flatten());
+    fieldErrors.selectedFood = validatedFood.error.flatten().formErrors;
+    isValid = false;
   }
 
-  // 2. Validate Phone Number (only if provided)
+  // 2. Validate Drinks Selection (optional, so only check if present - schema handles type)
+   const validatedDrinks = drinksSchema.safeParse(selectedDrinks);
+   if (!validatedDrinks.success) {
+       console.error("Server Action: Invalid drinks selection", validatedDrinks.error.flatten());
+       // Add drink errors if needed, though less critical as it's optional
+       // fieldErrors.selectedDrinks = validatedDrinks.error.flatten().formErrors;
+       // isValid = false; // Don't invalidate just for drinks if they are optional
+   }
+
+
+  // 3. Validate Phone Number (must be present now)
   let cleanPhoneNumber: string | null = null;
-  if (phoneNumber) {
+  if (!phoneNumber) {
+      console.error("Server Action: Phone number missing");
+      fieldErrors.phoneNumber = ["Phone number is required."];
+      isValid = false;
+  } else {
       const validatedPhone = phoneSchema.safeParse(phoneNumber);
       if (!validatedPhone.success) {
           console.error("Server Action: Invalid phone number format", validatedPhone.error.flatten());
-          return {
-              success: false,
-              message: "Validation failed.",
-              fieldErrors: { phoneNumber: validatedPhone.error.flatten().formErrors },
-          };
+          fieldErrors.phoneNumber = validatedPhone.error.flatten().formErrors;
+          isValid = false;
+      } else {
+          cleanPhoneNumber = validatedPhone.data;
       }
-      cleanPhoneNumber = validatedPhone.data;
-
-      // 3. Check for Duplicate Phone Number
-      if (submittedPhoneNumbers.has(cleanPhoneNumber)) {
-          console.warn("Server Action: Phone number already submitted:", cleanPhoneNumber);
-          return {
-              success: false,
-              message: "This phone number has already been used to submit a selection.",
-              fieldErrors: { phoneNumber: ["This phone number has already submitted a selection."] },
-          };
-      }
-  } else {
-       // This case should ideally be prevented by client-side logic, but handle defensively
-       console.error("Server Action: Phone number missing");
-       return {
-           success: false,
-           message: "Phone number is required.",
-           fieldErrors: { phoneNumber: ["Phone number is required."] },
-       };
   }
 
+  // If validation failed early, return errors
+  if (!isValid || !cleanPhoneNumber || !validatedFood.success) { // Ensure cleanPhoneNumber and food are valid
+      return {
+          success: false,
+          message: "Validation failed. Please check the highlighted fields.",
+          error: 'validation',
+          fieldErrors,
+          submission: null,
+      };
+  }
 
-  // 4. Simulate saving to backend (Replace with actual database logic)
+  // 4. Check for Duplicate Phone Number
+  if (submittedPhoneNumbers.has(cleanPhoneNumber)) {
+      console.warn("Server Action: Phone number already submitted:", cleanPhoneNumber);
+      return {
+          success: false,
+          message: "This phone number has already been used to submit a selection.",
+          error: 'duplicate_phone', // Specific error code for duplicate
+          fieldErrors: { phoneNumber: ["This phone number has already submitted a selection."] },
+          submission: null,
+      };
+  }
+
+  // 5. Simulate saving to backend
   try {
       const newSubmission: Submission = {
-          phoneNumber: cleanPhoneNumber!, // We've validated it's not null here
-          selectedItems: validatedItems.data,
+          phoneNumber: cleanPhoneNumber,
+          selectedFood: validatedFood.data, // Use validated food data
+          selectedDrinks: validatedDrinks.data || [], // Use validated drinks data or empty array
           timestamp: new Date(),
       };
       submissions.push(newSubmission);
-      submittedPhoneNumbers.add(cleanPhoneNumber!); // Add to the set for uniqueness check
+      submittedPhoneNumbers.set(cleanPhoneNumber, newSubmission); // Add to map
 
-      console.log("Server Action: Added submissions:", newSubmission);
+      console.log("Server Action: Added submission:", newSubmission);
       console.log("Server Action: Total submissions:", submissions.length);
 
-      return { success: true, message: "Your selection has been recorded!" };
+      // Return success with the submitted data (excluding timestamp)
+      const successData: SuccessSubmission = {
+         phoneNumber: newSubmission.phoneNumber,
+         selectedFood: newSubmission.selectedFood,
+         selectedDrinks: newSubmission.selectedDrinks.length > 0 ? newSubmission.selectedDrinks : undefined, // Only include if drinks were selected
+      };
+
+      return {
+          success: true,
+          message: "Your selection has been recorded!",
+          submission: successData, // Include the selected data
+          error: undefined,
+          fieldErrors: null,
+      };
 
   } catch (error) {
       console.error("Server Action: Error saving submission:", error);
       return {
           success: false,
           message: "An unexpected error occurred while saving your selection. Please try again.",
-          error: "database", // General category for server/DB errors
+          error: 'database', // General category for server/DB errors
+          fieldErrors: null,
+          submission: null,
       };
   }
 }
 
-// --- Database Simulation (Keep in memory for this example) ---
-// In a real application, you would replace the `submissions` array and
-// `submittedPhoneNumbers` set with interactions with a database like
-// Firestore, PostgreSQL, MongoDB, etc.
-
-// Example using Firestore (requires setup):
-/*
-import { collection, addDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase"; // Assume you have firebase initialized
-
-export async function submitPhoneNumberFirestore(prevState: any, formData: FormData): Promise<SubmitResult> {
-    // ... (validation code remains the same) ...
-
-    // Check Firestore for existing phone number
-    const q = query(collection(db, "submissions"), where("phoneNumber", "==", cleanPhoneNumber));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        return { success: false, message: "This phone number has already submitted a selection.", fieldErrors: { phoneNumber: ["Duplicate submission."] } };
-    }
-
-    // Add new submission to Firestore
-    try {
-        await addDoc(collection(db, "submissions"), {
-            phoneNumber: cleanPhoneNumber,
-            selectedItems: validatedItems.data,
-            timestamp: Timestamp.fromDate(new Date()),
-        });
-        console.log("Server Action: Added submission to Firestore");
-        return { success: true, message: "Your selection has been recorded!" };
-    } catch (error) {
-        console.error("Server Action: Error saving to Firestore:", error);
-        return { success: false, message: "Database error.", error: "database" };
-    }
-}
-*/
+// --- Database Simulation ---
+// Kept in memory as per previous implementation. Replace with actual DB logic if needed.
