@@ -12,12 +12,12 @@ export default function Home() {
         {/* Header Section */}
         <header className="text-center space-y-4">
            <Image
-              src="https://picsum.photos/seed/onga_event_logo/150/80" // Consistent logo seed
+              src="https://picsum.photos/seed/onga_official_logo/150/80" // Updated seed for 'onga-logo' placeholder
               alt="Onga Village Event Logo"
               width={150}
               height={80}
               className="mx-auto rounded-md shadow-sm"
-              data-ai-hint="event logo festive celebration"
+              data-ai-hint="onga official logo festive celebration" // Updated hint
             />
           <h1 className="text-4xl md:text-5xl font-bold text-primary flex items-center justify-center gap-3">
              <UtensilsCrossed className="h-8 w-8 md:h-10 md:w-10 text-secondary" /> Onga Village Feast
