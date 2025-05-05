@@ -8,75 +8,99 @@ body {
 
 @layer base {
   :root {
-    /* Earthy Tones & Vibrant Accents Theme */
-    --background: 30 25% 95%; /* Light Beige/Brown */
-    --foreground: 30 20% 15%; /* Dark Brown */
-    --card: 30 25% 98%; /* Slightly lighter card background */
-    --card-foreground: 30 20% 15%;
-    --popover: 30 25% 98%;
-    --popover-foreground: 30 20% 15%;
-    --primary: 16 100% 66%; /* Orange #FF7F50 */
-    --primary-foreground: 0 0% 100%; /* White text on Orange */
-    --secondary: 120 30% 65%; /* Muted Green */
-    --secondary-foreground: 120 25% 10%; /* Dark Green Text */
-    --muted: 30 20% 90%; /* Muted Beige */
-    --muted-foreground: 30 15% 45%; /* Darker Muted Text */
-    --accent: 40 60% 88%; /* Light Yellow/Gold Accent */
-    --accent-foreground: 40 40% 20%; /* Darker text on accent */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 30 20% 85%; /* Slightly darker border */
-    --input: 30 20% 90%; /* Input background */
-    --ring: 16 100% 66%; /* Orange for focus rings */
-    --chart-1: 16 100% 66%; /* Orange */
-    --chart-2: 40 80% 60%; /* Yellow */
-    --chart-3: 120 30% 50%; /* Green */
-    --chart-4: 30 70% 70%; /* Brownish */
-    --chart-5: 0 70% 65%; /* Reddish */
+    /* White, Red, Yellow, Blue Theme */
+    --background: 0 0% 98%; /* Almost White */
+    --foreground: 240 60% 15%; /* Dark Blue */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 240 60% 15%; /* Dark Blue */
+
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 240 60% 15%; /* Dark Blue */
+
+    --primary: 0 72% 51%; /* Red */
+    --primary-foreground: 0 0% 98%; /* Almost White */
+
+    --secondary: 217 91% 60%; /* Blue */
+    --secondary-foreground: 0 0% 98%; /* Almost White */
+
+    --muted: 240 5% 96%; /* Light Grayish Blue */
+    --muted-foreground: 240 5% 45%; /* Medium Grayish Blue */
+
+    --accent: 48 96% 59%; /* Yellow */
+    --accent-foreground: 240 60% 15%; /* Dark Blue */
+
+    --destructive: 0 84.2% 60.2%; /* Default Destructive Red */
+    --destructive-foreground: 0 0% 98%; /* Almost White */
+
+    --border: 240 5% 85%; /* Light Gray Border */
+    --input: 240 5% 90%; /* Slightly Darker Gray Input BG */
+    --ring: 217 91% 60%; /* Blue for focus rings */
+
+    --chart-1: 0 72% 51%; /* Red */
+    --chart-2: 48 96% 59%; /* Yellow */
+    --chart-3: 217 91% 60%; /* Blue */
+    --chart-4: 120 60% 50%; /* Green (Added for variety) */
+    --chart-5: 280 60% 60%; /* Purple (Added for variety) */
+
     --radius: 0.5rem;
-    --sidebar-background: 30 25% 92%; /* Sidebar background similar to main */
-    --sidebar-foreground: 30 20% 15%;
-    --sidebar-primary: 16 100% 66%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 60% 88%;
-    --sidebar-accent-foreground: 40 40% 20%;
-    --sidebar-border: 30 20% 85%;
-    --sidebar-ring: 16 100% 66%;
+
+    /* Sidebar specific colors - adjusted to match theme */
+    --sidebar-background: 0 0% 100%; /* White */
+    --sidebar-foreground: 240 60% 15%; /* Dark Blue */
+    --sidebar-primary: 0 72% 51%; /* Red */
+    --sidebar-primary-foreground: 0 0% 98%; /* Almost White */
+    --sidebar-accent: 48 96% 59%; /* Yellow */
+    --sidebar-accent-foreground: 240 60% 15%; /* Dark Blue */
+    --sidebar-border: 240 5% 85%; /* Light Gray Border */
+    --sidebar-ring: 217 91% 60%; /* Blue */
   }
+
   .dark {
-    /* Dark Theme (Adjust as needed, keeping earthy/vibrant feel) */
-    --background: 30 15% 10%; /* Dark Brown */
-    --foreground: 30 20% 90%; /* Light Beige Text */
-    --card: 30 15% 15%;
-    --card-foreground: 30 20% 90%;
-    --popover: 30 15% 15%;
-    --popover-foreground: 30 20% 90%;
-    --primary: 16 100% 66%; /* Orange #FF7F50 */
-    --primary-foreground: 0 0% 10%; /* Dark text on Orange */
-    --secondary: 120 30% 35%; /* Darker Muted Green */
-    --secondary-foreground: 120 25% 90%; /* Light Green Text */
-    --muted: 30 15% 25%; /* Dark Muted Beige */
-    --muted-foreground: 30 15% 65%; /* Lighter Muted Text */
-    --accent: 40 60% 30%; /* Dark Yellow/Gold Accent */
-    --accent-foreground: 40 40% 90%; /* Lighter text on accent */
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 30 15% 25%;
-    --input: 30 15% 20%;
-    --ring: 16 100% 70%; /* Brighter Orange for focus rings */
-    --chart-1: 16 100% 66%;
-    --chart-2: 40 80% 60%;
-    --chart-3: 120 30% 50%;
-    --chart-4: 30 70% 70%;
-    --chart-5: 0 70% 65%;
-    --sidebar-background: 30 15% 12%;
-    --sidebar-foreground: 30 20% 90%;
-    --sidebar-primary: 16 100% 66%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 40 60% 30%;
-    --sidebar-accent-foreground: 40 40% 90%;
-    --sidebar-border: 30 15% 25%;
-    --sidebar-ring: 16 100% 70%;
+    /* Dark Theme (Adjusted for contrast with Red, Yellow, Blue) */
+    --background: 240 10% 10%; /* Very Dark Blue */
+    --foreground: 0 0% 95%; /* Light Gray/Off-White */
+
+    --card: 240 10% 15%; /* Darker Blue */
+    --card-foreground: 0 0% 95%; /* Light Gray/Off-White */
+
+    --popover: 240 10% 12%; /* Even Darker Blue */
+    --popover-foreground: 0 0% 95%; /* Light Gray/Off-White */
+
+    --primary: 0 75% 65%; /* Slightly Brighter Red */
+    --primary-foreground: 0 0% 10%; /* Very Dark Text on Red */
+
+    --secondary: 217 80% 70%; /* Brighter Blue */
+    --secondary-foreground: 0 0% 10%; /* Very Dark Text on Blue */
+
+    --muted: 240 10% 25%; /* Dark Muted Blue */
+    --muted-foreground: 240 5% 65%; /* Lighter Muted Blue Text */
+
+    --accent: 48 90% 65%; /* Brighter Yellow */
+    --accent-foreground: 240 60% 10%; /* Very Dark Blue Text on Yellow */
+
+    --destructive: 0 70% 50%; /* Darker Destructive Red */
+    --destructive-foreground: 0 0% 98%; /* Almost White */
+
+    --border: 240 10% 30%; /* Dark Border */
+    --input: 240 10% 20%; /* Dark Input BG */
+    --ring: 217 80% 70%; /* Brighter Blue for focus rings */
+
+    --chart-1: 0 75% 65%; /* Red */
+    --chart-2: 48 90% 65%; /* Yellow */
+    --chart-3: 217 80% 70%; /* Blue */
+    --chart-4: 120 50% 60%; /* Green */
+    --chart-5: 280 50% 70%; /* Purple */
+
+    /* Sidebar specific colors - dark theme */
+    --sidebar-background: 240 10% 12%; /* Even Darker Blue */
+    --sidebar-foreground: 0 0% 95%; /* Light Gray/Off-White */
+    --sidebar-primary: 0 75% 65%; /* Brighter Red */
+    --sidebar-primary-foreground: 0 0% 10%; /* Very Dark Text on Red */
+    --sidebar-accent: 48 90% 65%; /* Brighter Yellow */
+    --sidebar-accent-foreground: 240 60% 10%; /* Very Dark Blue Text on Yellow */
+    --sidebar-border: 240 10% 30%; /* Dark Border */
+    --sidebar-ring: 217 80% 70%; /* Brighter Blue */
   }
 }
 
