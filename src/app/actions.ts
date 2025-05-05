@@ -83,7 +83,7 @@ export async function submitPhoneNumber(prevState: any, formData: FormData): Pro
       submissions.push(newSubmission);
       submittedPhoneNumbers.add(cleanPhoneNumber!); // Add to the set for uniqueness check
 
-      console.log("Server Action: Added submission:", newSubmission);
+      console.log("Server Action: Added submissions:", newSubmission);
       console.log("Server Action: Total submissions:", submissions.length);
 
       return { success: true, message: "Your selection has been recorded!" };
