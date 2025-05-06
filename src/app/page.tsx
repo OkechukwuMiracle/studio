@@ -24,7 +24,7 @@ export default function Home() {
              {/* Welcome Message */}
         <div className="text-center p-4 bg-inherit  max-w-xl">
           <h2 className="text-4xl md:text-5xl font-normal text-black mb-2 flex items-center justify-center gap-2 italic">
-             Your meal is just second away 🎉
+             Your meal is just seconds away 🎉
           </h2>
           
         </div>
