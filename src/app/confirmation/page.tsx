@@ -10,6 +10,8 @@ import Image from "next/image";
 import OngaLogo from "@/assets/onga-logo.png"
 import Image2 from "@/assets/Image 2 (1).png"
 
+export const dynamic = 'force-dynamic'; // ✅ Disable pre-rendering
+
 export default function ConfirmationPage() {
   const searchParams = useSearchParams();
   const foodId = searchParams.get('food');
