@@ -1,9 +1,33 @@
+
 {
-    "version": 2,
-    "builds": [
-      { "src": "next.config.js", "use": "@vercel/next" }
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "next build",
+    "devCommand": "next dev",
+    "outputDirectory": ".next",
+    "cleanUrls": true,
+    "redirects": [
+      {
+        "source": "/old-route",
+        "destination": "/new-route",
+        "permanent": true
+      }
     ],
-    "routes": [
-      { "src": "/(.*)", "dest": "/" }
+    "rewrites": [
+      {
+        "source": "/custom-path",
+        "destination": "/actual-path"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "X-Custom-Header",
+            "value": "my-value"
+          }
+        ]
+      }
     ]
   }
+  
