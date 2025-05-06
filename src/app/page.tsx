@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-no-repeat "
+    <main className="flex h-dvh flex-col items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden "
     style={{backgroundImage: ("url('/PETTE.png' )")}}>
-      <div className="w-full max-w-4xl flex flex-col items-center space-y-8  "
+      <div className="w-full max-w-4xl flex flex-col flex-col-1 items-center mt-6  overflow-hidden"
       >
 
         {/* Header Section */}
@@ -24,7 +24,7 @@ export default function Home() {
              {/* Welcome Message */}
         <div className="text-center p-4 bg-inherit  max-w-xl">
           <h2 className="text-4xl md:text-5xl font-normal text-black mb-2 flex items-center justify-center gap-2 italic">
-             Your meal is just second away 🎉
+             Your meal is just seconds away 🎉
           </h2>
           
         </div>
