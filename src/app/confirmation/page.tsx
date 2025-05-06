@@ -112,7 +112,7 @@ import { Button } from '@/components/ui/button';
 import { allMenuItems } from '@/components/menu-list'; // Import all items for lookup
 import Image from "next/image";
 import OngaLogo from "@/assets/onga-logo.png"
-import Image2 from "@/assets/Image 2 (1).png"
+import Image2 from "@/assets/onag-chef-bg.png"
 
 // Component that handles the useSearchParams hook
 const ConfirmationContent = () => {
@@ -125,7 +125,8 @@ const ConfirmationContent = () => {
   const selectedDrinks = drinkIds.map(id => allMenuItems.find(item => item.id === id)).filter(Boolean) as typeof allMenuItems; // Filter out nulls
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 pb-1 md:p-12 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/PETTE.png')" }}>
+    <main className=" min-h-screen bg-cover bg-center bg-no-repeat " style={{ backgroundImage: "url('/PETTE.png')" }}>
+      <div className="lg:w-[500px] lg:m-auto flex flex-col items-center justify-center p-3 pb-1 md:p-5 lg:border-[2px] lg:border-black/20 ">
       <header className="text-center">
         <Image
           src={OngaLogo} // Updated seed for 'onga-logo' placeholder
@@ -137,7 +138,7 @@ const ConfirmationContent = () => {
         <CardTitle className="text-5xl font-normal text-red-600 mt-8 italic">Great Choice!</CardTitle>
       </header>
 
-      <CardContent className="p-6 mt-6 bg-white/60 rounded-xl">
+      <CardContent className="p-6 mt-6 bg-white/80 rounded-xl">
         <div className="space-y-2">
           <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
             Your Selected Food:
@@ -174,7 +175,7 @@ const ConfirmationContent = () => {
 
       <div className="relative">
         <div className="mt-7">
-          <Image src={Image2} alt="" className="w-[100%] m-auto" />
+          <Image src={Image2} alt="" className="w-[80%] m-auto" />
         </div>
 
         <div className="text-center mt-8 absolute bottom-0 right-[-20]">
@@ -184,6 +185,7 @@ const ConfirmationContent = () => {
             </Button>
           </Link>
         </div>
+      </div>
       </div>
     </main>
   );

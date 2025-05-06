@@ -26,14 +26,14 @@ export default function MenuListPage() {
             <div className="w-full flex flex-col md:flex-row items-start justify-center gap-8 md:gap-12">
     
               {/* Menu Section */} 
-               <section className="w-full md:flex-1 order-2 md:order-1">
+               <section className="w-full m-auto md:flex-1 order-2 md:order-1">
                  <MenuList />
               </section>
     
             </div>
     
              
-             <footer className="mt-12 text-center text-sm text-muted-foreground">
+             <footer className="mt-12 text-center text-sm text-black">
                © {new Date().getFullYear()} Onga Village Event. Enjoy the celebration!
              </footer>
     

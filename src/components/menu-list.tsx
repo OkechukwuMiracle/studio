@@ -21,17 +21,17 @@ import { useToast } from "@/hooks/use-toast";
 import { submitPhoneNumber, type SubmitResult } from "@/app/actions"; // Import SubmitResult type
 import { Utensils, GlassWater, ChefHat, Soup, CookingPot } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
-import Ofada from "@/assets/ofada.jpeg";
+import Ofada from "@/assets/ofada-rice.jpg";
 import Amala from "@/assets/amala.jpeg";
 import Nkwobi from "@/assets/nkwobi.jpg";
 import RamGrill from "@/assets/ram-grill.jpeg";
 import MiyanKuka from "@/assets/miyan-kuka.jpg";
 import IgboEgusi from "@/assets/egusi-soup.jpg";
-import Masa from "@/assets/masa.jpg";
+import Masa from "@/assets/masa-cake.jpeg";
 import JollofChicken from "@/assets/jollof-rice.jpg";
 import BangaStarch from "@/assets/banga.jpg";
 import PalmWine from "@/assets/palmwine.jpeg";
-import Kunu from "@/assets/kunu.jpg";
+import Kunu from "@/assets/kunu-milk.jpg";
 
 
 interface MenuItem {
@@ -326,7 +326,7 @@ export function MenuList(props: ComponentProps<"form">) {
     <Form {...form}>
       <form
          onSubmit={form.handleSubmit(handleFormSubmit)}
-         className="w-full max-w-2xl space-y-6"
+         className="w-full  space-y-6"
          {...props}
         >
         <div className="space-y-3">
