@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-no-repeat "
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-no-repeat overflow-y-hidden "
     style={{backgroundImage: ("url('/PETTE.png' )")}}>
       <div className="w-full max-w-4xl flex flex-col items-center space-y-8  "
       >
