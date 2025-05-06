@@ -19,9 +19,6 @@ export default function DuplicateErrorPage() {
           <p className="text-muted-foreground">
             Only one food selection is allowed per phone number to ensure everyone gets a chance to enjoy the feast.
           </p>
-          <p className="text-muted-foreground">
-            If you believe this is an error, please contact the event organizers.
-          </p>
           <div className="mt-8">
             <Link href="/" passHref>
               <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">

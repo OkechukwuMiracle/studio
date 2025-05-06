@@ -1,62 +1,57 @@
 import Image from "next/image";
-import { QrCodeDisplay } from "@/components/qr-code";
-import { MenuList } from "@/components/menu-list";
-import { Separator } from "@/components/ui/separator";
-import { UtensilsCrossed, PartyPopper } from "lucide-react";
+import Link from 'next/link';
+import OngaLogo from "@/assets/onga-logo.png"
+import Image1 from "@/assets/Image 1.png"
+import Image2 from "@/assets/Image 2.png"
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-background">
-      <div className="w-full max-w-4xl flex flex-col items-center space-y-8">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-repeat "
+    style={{backgroundImage: ("url('/PETTE.png' )")}}>
+      <div className="w-full max-w-4xl flex flex-col items-center space-y-8  "
+      >
 
         {/* Header Section */}
         <header className="text-center space-y-4">
            <Image
-              src="https://picsum.photos/seed/onga_official_logo/150/80" // Updated seed for 'onga-logo' placeholder
+              src={OngaLogo} // Updated seed for 'onga-logo' placeholder
               alt="Onga Village Event Logo"
-              width={150}
-              height={80}
+              width={200}
+              height={105}
               className="mx-auto rounded-md shadow-sm"
-              data-ai-hint="onga official logo festive celebration" // Updated hint
             />
-          <h1 className="text-4xl md:text-5xl font-bold text-primary flex items-center justify-center gap-3">
-             <UtensilsCrossed className="h-8 w-8 md:h-10 md:w-10 text-secondary" /> Onga Village Feast
-          </h1>
-          <p className="text-lg text-muted-foreground">Select Your Meal & Optional Drinks!</p>
+             {/* Welcome Message */}
+        <div className="text-center p-4 bg-inherit  max-w-xl">
+          <h2 className="text-4xl md:text-5xl font-normal text-black mb-2 flex items-center justify-center gap-2 italic">
+             Your meal is just second away 🎉
+          </h2>
+          
+        </div>
         </header>
 
-        {/* Welcome Message */}
-        <div className="text-center p-4 bg-card rounded-lg shadow border border-border max-w-xl">
-          <h2 className="text-2xl font-semibold text-foreground mb-2 flex items-center justify-center gap-2">
-            <PartyPopper className="h-6 w-6 text-accent" /> Welcome to the Celebration!
-          </h2>
-          <p className="text-muted-foreground">
-            We're delighted to have you join the Onga Village Feast. Please make your food selection below. Drinks are optional. Enjoy the festivities!
-          </p>
+       
+        <div className=" mt-5 flex justify-between items-center ">
+            <div className="">
+              <Image 
+              src={Image1}
+              alt=""
+              className="absolute w-[20%] bottom-0 left-0 "
+              />
+            </div>
+            <Link href="/menuList" passHref >
+            
+                <Button  className="cursor-pointer text-black rounded-2xl px-5 py-2 bg-red-500 shadow-2xl border border-black hover:bg-red-800 hover:text-white font-bold ">Claim your meal</Button>
+            
+            </Link>
+            <div className="">
+            <Image 
+              src={Image2}
+              alt=""
+              className="absolute w-[20%] bottom-0 right-0 "
+              />
+            </div>
         </div>
-
-
-        <Separator className="w-1/2 bg-border" />
-
-        {/* Content Section */}
-        <div className="w-full flex flex-col md:flex-row items-start justify-center gap-8 md:gap-12">
-
-          {/* Menu Section */}
-          <section className="w-full md:flex-1 order-2 md:order-1">
-             <MenuList />
-          </section>
-
-          {/* QR Code Section */}
-           <aside className="w-full md:w-auto order-1 md:order-2 flex justify-center pt-8 md:pt-0">
-             <QrCodeDisplay />
-           </aside>
-
-        </div>
-
-         {/* Footer */}
-         <footer className="mt-12 text-center text-sm text-muted-foreground">
-           © {new Date().getFullYear()} Onga Village Event. Enjoy the celebration!
-         </footer>
 
       </div>
     </main>

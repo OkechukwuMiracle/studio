@@ -21,31 +21,44 @@ import { useToast } from "@/hooks/use-toast";
 import { submitPhoneNumber, type SubmitResult } from "@/app/actions"; // Import SubmitResult type
 import { Utensils, GlassWater, ChefHat, Soup, CookingPot } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
+import Ofada from "@/assets/ofada.jpeg";
+import Amala from "@/assets/amala.jpeg";
+import Nkwobi from "@/assets/nkwobi.jpg";
+import RamGrill from "@/assets/ram-grill.jpeg";
+import MiyanKuka from "@/assets/miyan-kuka.jpg";
+import IgboEgusi from "@/assets/egusi-soup.jpg";
+import Masa from "@/assets/masa.jpg";
+import JollofChicken from "@/assets/jollof-rice.jpg";
+import BangaStarch from "@/assets/banga.jpg";
+import PalmWine from "@/assets/palmwine.jpeg";
+import Kunu from "@/assets/kunu.jpg";
+
 
 interface MenuItem {
   id: string;
   name: string;
   description: string;
+  image: any;
   icon?: React.ElementType;
-  imageHint: string;
+  // imageHint: string;
   type: 'food' | 'drink';
 }
 
 const foodItems: MenuItem[] = [
-  { id: "ofada", name: "Ofada Rice & Sauce", description: "Traditional spicy sauce with local rice.", icon: Utensils, imageHint: "african rice stew", type: "food" },
-  { id: "amala", name: "Amala & Ewedu + Gbegiri", description: "Yam flour paste with bean and vegetable soups.", icon: Utensils, imageHint: "amala soup nigeria", type: "food" },
-  { id: "nkwobi", name: "Nkwobi", description: "Spicy cow foot delicacy.", icon: ChefHat, imageHint: "nkwobi nigeria food", type: "food" },
-  { id: "ram_grill", name: "Ram Grill", description: "Succulent grilled ram meat.", icon: ChefHat, imageHint: "grilled lamb meat", type: "food" },
-  { id: "miyan_kuka", name: "Miyan Kuka", description: "Dried baobab leaves soup, a Hausa specialty.", icon: Soup, imageHint: "miyan kuka soup nigeria", type: "food" },
-  { id: "igbo_egusi", name: "Igbo Egusi & Yellow Eba", description: "Melon seed soup served with cassava dough.", icon: Utensils, imageHint: "egusi soup eba nigeria", type: "food" },
-  { id: "masa", name: "Masa", description: "Northern Nigerian rice cakes/pancakes.", icon: CookingPot, imageHint: "masa rice cake nigeria", type: "food" },
-  { id: "jollof_chicken", name: "Jollof Rice & Chicken", description: "Classic Jollof rice with chicken and plantain.", icon: Utensils, imageHint: "jollof rice chicken plantain", type: "food" },
-  { id: "banga_starch", name: "Banga and Starch", description: "Palm nut soup served with delta starch.", icon: Soup, imageHint: "banga soup starch delta nigeria", type: "food" },
+  { id: "ofada", name: "Ofada Rice & Sauce", description: "Traditional spicy sauce with local rice.", icon: Utensils, image: Ofada, type: "food" },
+  { id: "amala", name: "Amala & Ewedu + Gbegiri", description: "Yam flour paste with bean and vegetable soups.", icon: Utensils, image: Amala, type: "food" },
+  { id: "nkwobi", name: "Nkwobi", description: "Spicy cow foot delicacy.", icon: ChefHat, image: Nkwobi, type: "food" },
+  { id: "ram_grill", name: "Ram Grill", description: "Succulent grilled ram meat.", icon: ChefHat, image: RamGrill, type: "food" },
+  { id: "miyan_kuka", name: "Miyan Kuka", description: "Dried baobab leaves soup, a Hausa specialty.", icon: Soup, image: MiyanKuka, type: "food" },
+  { id: "igbo_egusi", name: "Igbo Egusi & Yellow Eba", description: "Melon seed soup served with cassava dough.", icon: Utensils, image: IgboEgusi, type: "food" },
+  { id: "masa", name: "Masa", description: "Northern Nigerian rice cakes/pancakes.", icon: CookingPot, image: Masa, type: "food" },
+  { id: "jollof_chicken", name: "Jollof Rice & Chicken", description: "Classic Jollof rice with chicken and plantain.", icon: Utensils, image: JollofChicken, type: "food" },
+  { id: "banga_starch", name: "Banga and Starch", description: "Palm nut soup served with delta starch.", icon: Soup, image: BangaStarch, type: "food" },
 ];
 
 const drinkItems: MenuItem[] = [
-  { id: "palm_wine", name: "Palm Wine", description: "Traditional fermented palm sap drink.", icon: GlassWater, imageHint: "palm wine glass", type: "drink" },
-  { id: "kunu", name: "Kunu", description: "Refreshing millet or sorghum drink.", icon: GlassWater, imageHint: "kunu drink nigeria", type: "drink" },
+  { id: "palm_wine", name: "Palm Wine", description: "Traditional fermented palm sap drink.", icon: GlassWater, image: PalmWine, type: "drink" },
+  { id: "kunu", name: "Kunu", description: "Refreshing millet or sorghum drink.", icon: GlassWater, image: Kunu, type: "drink" },
 ];
 
 // Combined list for easy lookup by ID if needed elsewhere
@@ -163,7 +176,7 @@ export function MenuList(props: ComponentProps<"form">) {
    // Helper function to render food items (Radio Group)
    const renderFoodItems = (items: MenuItem[]) => (
      <>
-       <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Food (Select One)</h3>
+       {/* <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Food (Select One)</h3> */}
         <FormField
           control={form.control}
           name="selectedFood"
@@ -203,12 +216,12 @@ export function MenuList(props: ComponentProps<"form">) {
                                </CardHeader>
                                <CardContent className="flex items-center space-x-4 pt-2">
                                   <Image
-                                    src={`https://picsum.photos/seed/${item.id}/100/100`}
+                                    src={item.image}
                                     alt="" // Decorative
-                                    width={60}
-                                    height={60}
-                                    className="rounded-md object-cover"
-                                    data-ai-hint={item.imageHint}
+                                    width={50}
+                                    height={50}
+                                    className="rounded-full object-cover"
+                                    // data-ai-hint={item.image}
                                   />
                                  <Label
                                     htmlFor={`food-${item.id}`} // Match radio item ID
@@ -279,12 +292,12 @@ export function MenuList(props: ComponentProps<"form">) {
                              </CardHeader>
                              <CardContent className="flex items-center space-x-4 pt-2">
                                 <Image
-                                  src={`https://picsum.photos/seed/${item.id}/100/100`}
+                                  src={item.image}
                                   alt="" // Decorative
-                                  width={60}
-                                  height={60}
-                                  className="rounded-md object-cover"
-                                  data-ai-hint={item.imageHint}
+                                  width={50}
+                                  height={50}
+                                  className="rounded-full object-cover"
+                                  // data-ai-hint={item.image}
                                 />
                                <Label
                                   htmlFor={`drink-${item.id}`} // Match checkbox ID
@@ -317,8 +330,8 @@ export function MenuList(props: ComponentProps<"form">) {
          {...props}
         >
         <div className="space-y-3">
-            <h2 className="text-2xl font-semibold text-foreground">Choose Your Items</h2>
-            <p className="text-muted-foreground">Select one food item and any optional drinks.</p>
+            {/* <h2 className="text-2xl font-semibold text-foreground">Choose Your Items</h2>
+            <p className="text-muted-foreground">Select one food item and any optional drinks.</p> */}
 
             {renderFoodItems(foodItems)}
             <Separator className="my-6" />
