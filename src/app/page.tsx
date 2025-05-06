@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="flex h-screen flex-col items-center justify-center  bg-cover bg-center bg-no-repeat overflow-hidden "
+    <main className="flex h-dvh flex-col items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden "
     style={{backgroundImage: ("url('/PETTE.png' )")}}>
-      <div className="w-full max-w-4xl flex flex-col items-center mt-6  overflow-hidden"
+      <div className="w-full max-w-4xl flex flex-col flex-col-1 items-center mt-6  overflow-hidden"
       >
 
         {/* Header Section */}
