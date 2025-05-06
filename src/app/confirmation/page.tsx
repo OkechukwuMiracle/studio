@@ -125,7 +125,7 @@ const ConfirmationContent = () => {
   const selectedDrinks = drinkIds.map(id => allMenuItems.find(item => item.id === id)).filter(Boolean) as typeof allMenuItems; // Filter out nulls
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 pb-1 md:p-12 bg-cover bg-center bg-repeat" style={{ backgroundImage: "url('/PETTE.png')" }}>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 pb-1 md:p-12 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/PETTE.png')" }}>
       <header className="text-center">
         <Image
           src={OngaLogo} // Updated seed for 'onga-logo' placeholder

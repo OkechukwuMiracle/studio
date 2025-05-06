@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-repeat "
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-no-repeat "
     style={{backgroundImage: ("url('/PETTE.png' )")}}>
       <div className="w-full max-w-4xl flex flex-col items-center space-y-8  "
       >
@@ -39,7 +39,7 @@ export default function Home() {
               className="absolute w-[20%] bottom-0 left-0 "
               />
             </div>
-            <Link href="/menuList" passHref >
+            <Link href="/menulist" passHref >
             
                 <Button  className="cursor-pointer text-black rounded-2xl px-5 py-2 bg-red-500 shadow-2xl border border-black hover:bg-red-800 hover:text-white font-bold ">Claim your meal</Button>
             
