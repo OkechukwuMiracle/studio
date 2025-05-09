@@ -1,9 +1,24 @@
-// import Link from 'next/link';
+"use client";
 import Image from "next/image";
 import OngaLogo from "@/assets/onga-logo.png"
 import { MenuList } from "@/components/menu-list";
+import { useState } from "react";
+import { RecaptchaVerifier } from "firebase/auth";
+import { submitPhoneNumber } from "../actions";
+import { auth } from "@/lib/firebase";
+import RecaptchaClient from "../components/RecaptchaClient";
 
 export default function MenuListPage() {
+    const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+ const [result, setResult] = useState<any>();
+ const handleSubmit = async (formData: FormData) => {
+     //add the verifier to the form data
+     if (recaptchaVerifier) {
+         formData.append("recaptchaVerifier", JSON.stringify(recaptchaVerifier));
+     }
+     const res = await submitPhoneNumber(null, formData);
+     setResult(res);
+ }
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-12 bg-cover bg-center bg-no-repeat "
@@ -27,7 +42,13 @@ export default function MenuListPage() {
     
               {/* Menu Section */} 
                <section className="w-full m-auto md:flex-1 order-2 md:order-1">
-                 <MenuList />
+                 
+                 <RecaptchaClient setRecaptchaVerifier={setRecaptchaVerifier} auth={auth} />
+                 <form action={handleSubmit}>
+                    <input type="text" name="phoneNumber" />
+                    <input type="text" name="otp" />
+                    <button type="submit">submit</button>
+                 </form>
               </section>
     
             </div>
