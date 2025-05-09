@@ -22,7 +22,7 @@ export default function DuplicateErrorPage() {
           <div className="mt-8">
             <Link href="/" passHref>
               <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                Return to Selection Page
+                Return to Welcome Page
               </Button>
             </Link>
           </div>
