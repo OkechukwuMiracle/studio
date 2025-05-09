@@ -3,7 +3,6 @@
 
 import type { ComponentProps } from "react";
 import { useState, useEffect, useRef } from "react";
-import { auth, RecaptchaVerifier, signInWithPhoneNumber } from "@/lib/firebase";
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
@@ -68,8 +67,7 @@ export const allMenuItems = [...foodItems, ...drinkItems];
 const FormSchema = z.object({
   selectedFood: z.string({ required_error: "Please select one food item." }),
   selectedDrinks: z.array(z.string()).optional(),
-  phoneNumber: z.string().optional(), // Optional because it's shown conditionally
-  otp: z.string().optional(), // OTP is optional in the schema, validated conditionally
+  phoneNumber: z.string().min(1, "Phone number is required.").regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format. Use E.164 (e.g., +1234567890)."),
 });
 
 type FormData = z.infer<typeof FormSchema>;
@@ -80,19 +78,11 @@ const initialState: SubmitResult = {
   error: undefined,
   fieldErrors: null,
   submission: null,
-  otpRequired: false,
-  phoneNumberForOtp: null,
 };
 
 export function MenuList(props: ComponentProps<"form">) {
   const [showInitialPhoneInput, setShowInitialPhoneInput] = useState(false);
-  const [otpStep, setOtpStep] = useState(false);
-  const [phoneNumberForOtpState, setPhoneNumberForOtpState] = useState<string | null>(null); 
-  const [confirmationResultState, setConfirmationResultState] = useState<any>(null); 
-
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null); 
-
+  
   const { toast } = useToast();
   const router = useRouter();
 
@@ -102,7 +92,6 @@ export function MenuList(props: ComponentProps<"form">) {
       selectedFood: undefined,
       selectedDrinks: [],
       phoneNumber: "",
-      otp: "",
     },
   });
 
@@ -112,150 +101,21 @@ export function MenuList(props: ComponentProps<"form">) {
   const watchedFood = form.watch("selectedFood");
 
   useEffect(() => {
-    if (watchedFood && !otpStep) {
+    if (watchedFood) {
       setShowInitialPhoneInput(true);
-    } else if (!watchedFood && !otpStep) {
+    } else {
       setShowInitialPhoneInput(false);
     }
-  }, [watchedFood, otpStep]);
+  }, [watchedFood]);
 
 
-  // Initialize reCAPTCHA
-  useEffect(() => {
-    if (typeof window !== 'undefined' && auth && recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
-      try {
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': (response: any) => {
-            console.log("reCAPTCHA solved:", response);
-          },
-          'expired-callback': () => {
-            console.warn("reCAPTCHA expired");
-            if (recaptchaVerifierRef.current) {
-                recaptchaVerifierRef.current.clear();
-                recaptchaVerifierRef.current = null; 
-            }
-          }
-        });
-        recaptchaVerifierRef.current = verifier;
-      } catch (error) {
-        console.error("Error initializing RecaptchaVerifier:", error);
-        toast({
-          title: "Setup Error",
-          description: "Could not initialize security check. Please refresh.",
-          variant: "destructive",
-        });
-      }
-    }
-    return () => {
-      if (recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current.clear();
-      }
-    };
-  }, []); 
+  const handleFormSubmit = (formDataValues: FormData) => {
+    const submissionFormData = new FormData();
+    submissionFormData.append("selectedFood", formDataValues.selectedFood);
+    formDataValues.selectedDrinks?.forEach(drink => submissionFormData.append("selectedDrinks", drink));
+    submissionFormData.append("phoneNumber", formDataValues.phoneNumber);
 
-
-  const sendOtp = async (phoneNumberInput: string) => {
-    if (!recaptchaVerifierRef.current) {
-      toast({
-        title: "Verification Error",
-        description: "Security verifier not ready. Please wait or refresh.",
-        variant: "destructive",
-      });
-      return { success: false, error: "recaptcha-not-ready" };
-    }
-    try {
-      const formattedPhoneNumber = phoneNumberInput.startsWith('+') ? phoneNumberInput : `+${phoneNumberInput}`; 
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhoneNumber, recaptchaVerifierRef.current);
-      setConfirmationResultState(confirmation);
-      setOtpStep(true);
-      setPhoneNumberForOtpState(formattedPhoneNumber);
-      setShowInitialPhoneInput(false); 
-      form.resetField("otp"); 
-      toast({
-        title: "OTP Sent",
-        description: `A verification code has been sent to ${formattedPhoneNumber}.`,
-        variant: "default",
-      });
-      return { success: true };
-    } catch (error: any) {
-      console.error("Error sending OTP:", error);
-      let toastMessage = "An unexpected error occurred while sending the OTP. Please try again.";
-      let returnError = error.message || "otp-send-error";
-
-      if (error.code === 'auth/billing-not-enabled') {
-        toastMessage = "The OTP service is currently unavailable. Please try again later or contact support.";
-        returnError = 'auth/billing-not-enabled';
-      } else if (error.code === 'auth/invalid-phone-number') {
-        toastMessage = "The phone number format is invalid. Please ensure it includes the country code (e.g., +1234567890).";
-        returnError = 'auth/invalid-phone-number';
-      } else if (error.code === 'auth/too-many-requests') {
-        toastMessage = "Too many OTP requests. Please wait a while before trying again.";
-        returnError = 'auth/too-many-requests';
-      } else if (error.message) {
-        toastMessage = error.message;
-      }
-
-      toast({
-        title: "OTP Error",
-        description: toastMessage,
-        variant: "destructive",
-      });
-      if (recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current.render().catch(console.error);
-      }
-      return { success: false, error: returnError };
-    }
-  };
-
-
-  const handleFormSubmit = async (formDataValues: FormData) => {
-    if (!formDataValues.selectedFood) {
-        form.setError("selectedFood", { message: "Please select a food item before submitting." });
-        return;
-    }
-
-    if (otpStep) { 
-      if (!formDataValues.otp) {
-        form.setError("otp", { message: "OTP is required." });
-        return;
-      }
-      if (!confirmationResultState) {
-        toast({ title: "Error", description: "OTP confirmation not found. Please try sending OTP again.", variant: "destructive" });
-        setOtpStep(false); 
-        setShowInitialPhoneInput(true);
-        return;
-      }
-      try {
-        await confirmationResultState.confirm(formDataValues.otp);
-        const submissionFormData = new FormData();
-        submissionFormData.append("selectedFood", form.getValues("selectedFood") || "");
-        form.getValues("selectedDrinks")?.forEach(drink => submissionFormData.append("selectedDrinks", drink));
-        submissionFormData.append("phoneNumber", phoneNumberForOtpState || ""); 
-
-        formAction(submissionFormData); 
-
-      } catch (error: any) {
-        console.error("Error verifying OTP:", error);
-        form.setError("otp", { message: error.code === 'auth/invalid-verification-code' ? "Invalid OTP. Please try again." : "Failed to verify OTP." });
-        toast({
-          title: "OTP Verification Failed",
-          description: error.code === 'auth/invalid-verification-code' ? "The OTP you entered is incorrect." : "An error occurred during OTP verification.",
-          variant: "destructive",
-        });
-      }
-    } else if (showInitialPhoneInput) { 
-      if (!formDataValues.phoneNumber) {
-        form.setError("phoneNumber", { message: "Phone number is required to get OTP." });
-        return;
-      }
-      const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-      if (!phoneRegex.test(formDataValues.phoneNumber)) {
-          form.setError("phoneNumber", { message: "Invalid phone number format. Use E.164 (e.g., +1234567890)." });
-          return;
-      }
-      await sendOtp(formDataValues.phoneNumber);
-    }
+    formAction(submissionFormData);
   };
 
    useEffect(() => {
@@ -301,8 +161,8 @@ export function MenuList(props: ComponentProps<"form">) {
                  <RadioGroup
                     onValueChange={(value) => {
                         field.onChange(value);
-                        if (value && !otpStep) setShowInitialPhoneInput(true);
-                        else if (!value && !otpStep) setShowInitialPhoneInput(false);
+                        if (value) setShowInitialPhoneInput(true);
+                        else setShowInitialPhoneInput(false);
                     }}
                     value={field.value}
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -440,10 +300,8 @@ export function MenuList(props: ComponentProps<"form">) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="w-full space-y-8" {...props}>
-        <div id="recaptcha-container" ref={recaptchaContainerRef} className="fixed bottom-0 right-0"></div>
-
-        {!otpStep && (
-          <motion.div
+        
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -453,37 +311,26 @@ export function MenuList(props: ComponentProps<"form">) {
             {renderFoodItems(foodItems)}
             <Separator className="my-8" />
             {renderDrinkItems(drinkItems)}
-          </motion.div>
-        )}
+        </motion.div>
         
-        {otpStep && (
-            <>
-                <input type="hidden" {...form.register("selectedFood")} />
-                {form.getValues("selectedDrinks")?.map((drinkId, index) => (
-                    <input key={index} type="hidden" value={drinkId} {...form.register(`selectedDrinks.${index}` as const)} />
-                ))}
-            </>
-        )}
-
-
         <motion.div
            initial={false}
            animate={{ 
-             height: showInitialPhoneInput && !otpStep ? 'auto' : 0, 
-             opacity: showInitialPhoneInput && !otpStep ? 1 : 0,
-             marginTop: showInitialPhoneInput && !otpStep ? '2rem' : '0',
-             display: showInitialPhoneInput && !otpStep ? 'block' : 'none',
+             height: showInitialPhoneInput ? 'auto' : 0, 
+             opacity: showInitialPhoneInput ? 1 : 0,
+             marginTop: showInitialPhoneInput ? '2rem' : '0',
+             display: showInitialPhoneInput ? 'block' : 'none',
             }}
            transition={{ duration: 0.4, ease: "easeInOut" }}
            style={{ overflow: 'hidden' }}
          >
-           {showInitialPhoneInput && !otpStep && (
+           {showInitialPhoneInput && (
              <FormField
                control={form.control}
                name="phoneNumber"
                render={({ field }) => (
                  <FormItem className="pt-4 border-t border-border">
-                   <FormLabel htmlFor="phoneNumber" className="text-lg font-semibold text-foreground">Enter Your Phone Number for OTP</FormLabel>
+                   <FormLabel htmlFor="phoneNumber" className="text-lg font-semibold text-foreground">Enter Your Phone Number</FormLabel>
                    <FormControl>
                      <Input
                         id="phoneNumber"
@@ -494,7 +341,7 @@ export function MenuList(props: ComponentProps<"form">) {
                         aria-required="true"
                       />
                    </FormControl>
-                   <FormDescription>We&apos;ll send a one-time password to this number.</FormDescription>
+                   <FormDescription>Your phone number is required to submit your selection.</FormDescription>
                    <FormMessage />
                  </FormItem>
                )}
@@ -503,68 +350,24 @@ export function MenuList(props: ComponentProps<"form">) {
          </motion.div>
 
         <motion.div
-            initial={false}
-            animate={{ 
-                height: otpStep ? 'auto' : 0, 
-                opacity: otpStep ? 1 : 0,
-                display: otpStep ? 'block' : 'none',
-            }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            style={{ overflow: 'hidden' }}
-        >
-            {otpStep && phoneNumberForOtpState && (
-                <div className="pt-6 border-t border-border space-y-4">
-                    <p className="text-lg font-semibold text-center text-foreground">
-                        An OTP was sent to <span className="font-bold text-primary">{phoneNumberForOtpState}</span>.
-                    </p>
-                    <FormField
-                        control={form.control}
-                        name="otp"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel htmlFor="otp" className="text-lg font-semibold text-foreground">Enter OTP</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        id="otp"
-                                        {...field}
-                                        type="text"
-                                        inputMode="numeric"
-                                        pattern="\d{6}"
-                                        placeholder="123456"
-                                        maxLength={6}
-                                        className="transition-colors duration-300 focus:border-primary focus:ring-primary text-center text-xl tracking-widest"
-                                        aria-required="true"
-                                    />
-                                </FormControl>
-                                <FormDescription>Enter the 6-digit code.</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-            )}
-        </motion.div>
-
-
-        <motion.div
            initial={false}
            animate={{ 
-               height: (showInitialPhoneInput && !otpStep) || otpStep ? 'auto' : 0, 
-               opacity: (showInitialPhoneInput && !otpStep) || otpStep ? 1 : 0, 
-               marginTop: (showInitialPhoneInput && !otpStep) || otpStep ? '2rem' : '0',
-               display: (showInitialPhoneInput && !otpStep) || otpStep ? 'block' : 'none',
+               height: showInitialPhoneInput ? 'auto' : 0, 
+               opacity: showInitialPhoneInput ? 1 : 0, 
+               marginTop: showInitialPhoneInput ? '2rem' : '0',
+               display: showInitialPhoneInput ? 'block' : 'none',
             }}
            transition={{ duration: 0.4, ease: "easeInOut", delay: 0.1 }}
            style={{ overflow: 'hidden' }}
           >
-          {((showInitialPhoneInput && !otpStep) || otpStep) && ( 
+          {showInitialPhoneInput && ( 
              <Button
                  type="submit"
                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 text-lg transition-transform duration-200 hover:scale-105 active:scale-95 rounded-lg shadow-md"
                  disabled={isActionPending} 
                  aria-busy={isActionPending}
                >
-                 {isActionPending ? "Processing..." : (otpStep ? "Verify OTP & Submit Selection" : "Get OTP to Submit")}
+                 {isActionPending ? "Processing..." : "Submit Selection"}
                </Button>
              )}
            </motion.div>
@@ -572,5 +375,3 @@ export function MenuList(props: ComponentProps<"form">) {
     </Form>
   );
 }
-
-    
