@@ -573,7 +573,7 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, startTransition } from "react";
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
@@ -776,31 +776,35 @@ export function MenuList(props: ComponentProps<"form">) {
 
 
   const handleFullFormSubmit = (formDataValues: FormData) => {
-    if (!formDataValues.faceScan && faceImageDataUri) { // Ensure faceScan field is populated if URI exists
-        formDataValues.faceScan = faceImageDataUri;
+    if (!formDataValues.faceScan && faceImageDataUri) {
+      formDataValues.faceScan = faceImageDataUri;
     }
-
+  
     if (!formDataValues.faceScan) {
-        toast({ title: "Face Scan Missing", description: "Please complete face verification.", variant: "destructive"});
-        form.setError("faceScan", { type: "manual", message: "Face scan is required." });
-        setCurrentStep("faceVerification"); // Push user back to face verification
-        return;
+      toast({ title: "Face Scan Missing", description: "Please complete face verification.", variant: "destructive"});
+      form.setError("faceScan", { type: "manual", message: "Face scan is required." });
+      setCurrentStep("faceVerification");
+      return;
     }
-
-    const submissionFormData = new FormData();
-    submissionFormData.append("selectedFood", formDataValues.selectedFood);
-    formDataValues.selectedDrinks?.forEach(drink => submissionFormData.append("selectedDrinks", drink));
-    submissionFormData.append("phoneNumber", formDataValues.phoneNumber);
-    if (formDataValues.faceScan) {
-      submissionFormData.append("faceScan", formDataValues.faceScan);
-    }
-    
-    formAction(submissionFormData);
+  
+    startTransition(() => {
+      const submissionFormData = new FormData();
+      submissionFormData.append("selectedFood", formDataValues.selectedFood);
+      formDataValues.selectedDrinks?.forEach(drink => submissionFormData.append("selectedDrinks", drink));
+      submissionFormData.append("phoneNumber", formDataValues.phoneNumber);
+      if (formDataValues.faceScan) {
+        submissionFormData.append("faceScan", formDataValues.faceScan);
+      }
+      
+      formAction(submissionFormData);
+    });
   };
   
 useEffect(() => {
   if (state?.message) { 
+    console.log("Server action result:", state);
     if (state.success && state.submission) {
+      console.log("Should redirect now");
       const params = new URLSearchParams();
       params.set('food', state.submission.selectedFood);
       state.submission.selectedDrinks?.forEach(drink => params.append('drinks', drink));
@@ -1005,10 +1009,11 @@ useEffect(() => {
   return (
     <Form {...form}>
       <form 
-        onSubmit={currentStep === "faceVerification" && faceImageDataUri ? form.handleSubmit(handleFullFormSubmit) : (e) => e.preventDefault()} 
-        className="w-full space-y-8" 
-        {...props}
-      >
+       action={formAction} 
+  onSubmit={form.handleSubmit(handleFullFormSubmit)}
+  className="w-full space-y-8" 
+  {...props}
+>
         
         <motion.div
             initial={{ opacity: 0 }}
@@ -1143,7 +1148,7 @@ useEffect(() => {
           >
             <Button
                 type="submit"
-                onClick={() => form.handleSubmit(handleFullFormSubmit)()} // Ensure this calls the correct submit handler
+                // onClick={() => form.handleSubmit(handleFullFormSubmit)()} // Ensure this calls the correct submit handler
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 text-lg transition-transform duration-200 hover:scale-105 active:scale-95 rounded-lg shadow-md"
                 disabled={isActionPending || !faceImageDataUri} 
                 aria-busy={isActionPending}
