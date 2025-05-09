@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
-import { useActionState } from "react"; // Updated import
+import { useActionState } from "react"; 
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,11 +87,11 @@ const initialState: SubmitResult = {
 export function MenuList(props: ComponentProps<"form">) {
   const [showInitialPhoneInput, setShowInitialPhoneInput] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
-  const [phoneNumberForOtpState, setPhoneNumberForOtpState] = useState<string | null>(null); // Renamed to avoid conflict
-  const [confirmationResultState, setConfirmationResultState] = useState<any>(null); // Renamed to avoid conflict
+  const [phoneNumberForOtpState, setPhoneNumberForOtpState] = useState<string | null>(null); 
+  const [confirmationResultState, setConfirmationResultState] = useState<any>(null); 
 
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null); // Ref for the reCAPTCHA container
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null); 
 
   const { toast } = useToast();
   const router = useRouter();
@@ -106,7 +106,6 @@ export function MenuList(props: ComponentProps<"form">) {
     },
   });
 
-  // Use useActionState from react for handling server action response
   const [state, formAction, isActionPending] = useActionState(submitPhoneNumber, initialState);
 
 
@@ -128,16 +127,13 @@ export function MenuList(props: ComponentProps<"form">) {
         const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           'size': 'invisible',
           'callback': (response: any) => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
             console.log("reCAPTCHA solved:", response);
           },
           'expired-callback': () => {
-            // Response expired. Ask user to solve reCAPTCHA again.
             console.warn("reCAPTCHA expired");
-            // Potentially reset and re-render reCAPTCHA if needed
             if (recaptchaVerifierRef.current) {
                 recaptchaVerifierRef.current.clear();
-                recaptchaVerifierRef.current = null; // Force re-initialization if needed
+                recaptchaVerifierRef.current = null; 
             }
           }
         });
@@ -151,13 +147,12 @@ export function MenuList(props: ComponentProps<"form">) {
         });
       }
     }
-    // Cleanup function to clear the verifier
     return () => {
       if (recaptchaVerifierRef.current) {
         recaptchaVerifierRef.current.clear();
       }
     };
-  }, []); // Ensure `auth` is stable or add to deps if it can change
+  }, []); 
 
 
   const sendOtp = async (phoneNumberInput: string) => {
@@ -170,13 +165,13 @@ export function MenuList(props: ComponentProps<"form">) {
       return { success: false, error: "recaptcha-not-ready" };
     }
     try {
-      const formattedPhoneNumber = phoneNumberInput.startsWith('+') ? phoneNumberInput : `+${phoneNumberInput}`; // Ensure E.164 format
+      const formattedPhoneNumber = phoneNumberInput.startsWith('+') ? phoneNumberInput : `+${phoneNumberInput}`; 
       const confirmation = await signInWithPhoneNumber(auth, formattedPhoneNumber, recaptchaVerifierRef.current);
       setConfirmationResultState(confirmation);
       setOtpStep(true);
       setPhoneNumberForOtpState(formattedPhoneNumber);
-      setShowInitialPhoneInput(false); // Hide phone input, show OTP
-      form.resetField("otp"); // Clear OTP field for new entry
+      setShowInitialPhoneInput(false); 
+      form.resetField("otp"); 
       toast({
         title: "OTP Sent",
         description: `A verification code has been sent to ${formattedPhoneNumber}.`,
@@ -194,6 +189,9 @@ export function MenuList(props: ComponentProps<"form">) {
       } else if (error.code === 'auth/invalid-phone-number') {
         toastMessage = "The phone number format is invalid. Please ensure it includes the country code (e.g., +1234567890).";
         returnError = 'auth/invalid-phone-number';
+      } else if (error.code === 'auth/too-many-requests') {
+        toastMessage = "Too many OTP requests. Please wait a while before trying again.";
+        returnError = 'auth/too-many-requests';
       } else if (error.message) {
         toastMessage = error.message;
       }
@@ -203,7 +201,6 @@ export function MenuList(props: ComponentProps<"form">) {
         description: toastMessage,
         variant: "destructive",
       });
-      // Reset reCAPTCHA if it caused an error or needs to be retried
       if (recaptchaVerifierRef.current) {
         recaptchaVerifierRef.current.render().catch(console.error);
       }
@@ -213,34 +210,30 @@ export function MenuList(props: ComponentProps<"form">) {
 
 
   const handleFormSubmit = async (formDataValues: FormData) => {
-    // Validate food selection (client-side check before sending OTP)
     if (!formDataValues.selectedFood) {
         form.setError("selectedFood", { message: "Please select a food item before submitting." });
         return;
     }
 
-    if (otpStep) { // If in OTP step, verify OTP and submit all data
+    if (otpStep) { 
       if (!formDataValues.otp) {
         form.setError("otp", { message: "OTP is required." });
         return;
       }
       if (!confirmationResultState) {
         toast({ title: "Error", description: "OTP confirmation not found. Please try sending OTP again.", variant: "destructive" });
-        setOtpStep(false); // Go back to phone input step
+        setOtpStep(false); 
         setShowInitialPhoneInput(true);
         return;
       }
       try {
         await confirmationResultState.confirm(formDataValues.otp);
-        // OTP Verified, now submit everything via server action
         const submissionFormData = new FormData();
         submissionFormData.append("selectedFood", form.getValues("selectedFood") || "");
         form.getValues("selectedDrinks")?.forEach(drink => submissionFormData.append("selectedDrinks", drink));
-        submissionFormData.append("phoneNumber", phoneNumberForOtpState || ""); // Use the phone number used for OTP
-        // No need to append OTP itself to server action, it's already verified.
-        // The server action will trust this submission if it reaches this point.
+        submissionFormData.append("phoneNumber", phoneNumberForOtpState || ""); 
 
-        formAction(submissionFormData); // Call the server action
+        formAction(submissionFormData); 
 
       } catch (error: any) {
         console.error("Error verifying OTP:", error);
@@ -251,12 +244,11 @@ export function MenuList(props: ComponentProps<"form">) {
           variant: "destructive",
         });
       }
-    } else if (showInitialPhoneInput) { // If phone input is shown, try to send OTP
+    } else if (showInitialPhoneInput) { 
       if (!formDataValues.phoneNumber) {
         form.setError("phoneNumber", { message: "Phone number is required to get OTP." });
         return;
       }
-      // Validate phone number format roughly (more robust validation in server action / Firebase)
       const phoneRegex = /^\+?[1-9]\d{1,14}$/;
       if (!phoneRegex.test(formDataValues.phoneNumber)) {
           form.setError("phoneNumber", { message: "Invalid phone number format. Use E.164 (e.g., +1234567890)." });
@@ -266,9 +258,8 @@ export function MenuList(props: ComponentProps<"form">) {
     }
   };
 
-   // Effect to handle server action responses
    useEffect(() => {
-    if (state?.message) { // Check if there's a message from the server action
+    if (state?.message) { 
       if (state.success && state.submission) {
         const params = new URLSearchParams();
         params.set('food', state.submission.selectedFood);
@@ -280,11 +271,9 @@ export function MenuList(props: ComponentProps<"form">) {
 
       if (state.error === 'duplicate_phone') {
         router.push('/error/duplicate');
-        // No toast needed here, the error page will explain
         return;
       }
       
-      // For other errors from the server action (after OTP was presumably verified client-side)
       toast({
         title: "Submission Error",
         description: state.message,
@@ -312,7 +301,6 @@ export function MenuList(props: ComponentProps<"form">) {
                  <RadioGroup
                     onValueChange={(value) => {
                         field.onChange(value);
-                        // Automatically show phone input when food is selected if not in OTP step
                         if (value && !otpStep) setShowInitialPhoneInput(true);
                         else if (!value && !otpStep) setShowInitialPhoneInput(false);
                     }}
@@ -452,7 +440,6 @@ export function MenuList(props: ComponentProps<"form">) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="w-full space-y-8" {...props}>
-        {/* Invisible reCAPTCHA container */}
         <div id="recaptcha-container" ref={recaptchaContainerRef} className="fixed bottom-0 right-0"></div>
 
         {!otpStep && (
@@ -469,22 +456,16 @@ export function MenuList(props: ComponentProps<"form">) {
           </motion.div>
         )}
         
-        {/* Hidden fields to carry over selections if needed by server action during OTP step,
-            though primary values (food, drinks, phone) are managed in component state or form values
-            and re-appended to FormData when calling the server action *after* OTP success.
-        */}
         {otpStep && (
             <>
                 <input type="hidden" {...form.register("selectedFood")} />
                 {form.getValues("selectedDrinks")?.map((drinkId, index) => (
                     <input key={index} type="hidden" value={drinkId} {...form.register(`selectedDrinks.${index}` as const)} />
                 ))}
-                 {/* Phone number for OTP is in phoneNumberForOtpState, not directly from form during OTP step */}
             </>
         )}
 
 
-        {/* Initial Phone Input */}
         <motion.div
            initial={false}
            animate={{ 
@@ -521,7 +502,6 @@ export function MenuList(props: ComponentProps<"form">) {
            )}
          </motion.div>
 
-        {/* OTP Input */}
         <motion.div
             initial={false}
             animate={{ 
@@ -566,7 +546,6 @@ export function MenuList(props: ComponentProps<"form">) {
         </motion.div>
 
 
-        {/* Submit Button Area */}
         <motion.div
            initial={false}
            animate={{ 
@@ -578,11 +557,11 @@ export function MenuList(props: ComponentProps<"form">) {
            transition={{ duration: 0.4, ease: "easeInOut", delay: 0.1 }}
            style={{ overflow: 'hidden' }}
           >
-          {((showInitialPhoneInput && !otpStep) || otpStep) && ( // Button visible if phone input is shown OR if in OTP step
+          {((showInitialPhoneInput && !otpStep) || otpStep) && ( 
              <Button
                  type="submit"
                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 text-lg transition-transform duration-200 hover:scale-105 active:scale-95 rounded-lg shadow-md"
-                 disabled={isActionPending} // Disable button if server action is pending
+                 disabled={isActionPending} 
                  aria-busy={isActionPending}
                >
                  {isActionPending ? "Processing..." : (otpStep ? "Verify OTP & Submit Selection" : "Get OTP to Submit")}
