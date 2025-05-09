@@ -12,7 +12,7 @@ export default function DuplicateErrorPage() {
           <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
           <CardTitle className="text-3xl font-bold text-red-800">Submission Already Exists</CardTitle>
           <CardDescription className="text-red-700 mt-2 text-lg">
-            Your face has already been used to make a selection.
+            Your face or phone number has already been used to make a selection.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 text-center space-y-6">
